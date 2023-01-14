@@ -12,6 +12,18 @@ namespace aph {
 
     VulkanSwapChain::VulkanSwapChain(VulkanDevice& deviceRef, VkExtent2D extent)
         : device{ deviceRef }, windowExtent{ extent } {
+        init();
+    }
+    
+    VulkanSwapChain::VulkanSwapChain(VulkanDevice& deviceRef, VkExtent2D extent, std::shared_ptr<VulkanSwapChain> old)
+        : device { deviceRef }, windowExtent{ extent }, m_oldSwapChain(old) {
+        init();
+
+        // clean up old swap chain after initialization
+        m_oldSwapChain = nullptr;
+    }
+
+    void VulkanSwapChain::init() {
         createSwapChain();
         createImageViews();
         createRenderPass();
@@ -162,7 +174,7 @@ namespace aph {
         createInfo.presentMode = presentMode;
         createInfo.clipped = VK_TRUE;
 
-        createInfo.oldSwapchain = VK_NULL_HANDLE;
+        createInfo.oldSwapchain = m_oldSwapChain == nullptr ? VK_NULL_HANDLE : m_oldSwapChain->swapChain;
 
         if (vkCreateSwapchainKHR(device.device(), &createInfo, nullptr, &swapChain) != VK_SUCCESS) {
             throw std::runtime_error("failed to create swap chain!");

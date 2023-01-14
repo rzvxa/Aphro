@@ -47,14 +47,18 @@ namespace aph {
 	}
 
 	void GameApp::createPipeline() {
-		auto pipelineConfig = VulkanPipeline::defaultPipelineConfigInfo(m_swapChain->width(), m_swapChain->height());
-		pipelineConfig.renderPass = m_swapChain->getRenderPass();
-		pipelineConfig.pipelineLayout = m_pipelineLayout;
+		assert(m_swapChain != nullptr && "Cannot create pipeline before swap chain");
+		assert(m_pipelineLayout != nullptr && "Cannot create pipeline before pipeline layout");
+
+		PipelineConfigInfo pipelineConfigInfo{};
+		VulkanPipeline::defaultPipelineConfigInfo(pipelineConfigInfo);
+		pipelineConfigInfo.renderPass = m_swapChain->getRenderPass();
+		pipelineConfigInfo.pipelineLayout = m_pipelineLayout;
 		m_pipeline = std::make_unique<VulkanPipeline>(
 			m_device,
 			"Assets/Aphro/Shaders/simple_shader.vert.spv",
 			"Assets/Aphro/Shaders/simple_shader.frag.spv",
-			pipelineConfig);
+			pipelineConfigInfo);
 	}
 
 	void GameApp::recreateSwapChain() {
@@ -65,8 +69,19 @@ namespace aph {
 		}
 
 		vkDeviceWaitIdle(m_device.device());
-		m_swapChain = nullptr;
-		m_swapChain = std::make_unique<VulkanSwapChain>(m_device, extent);
+		if (m_swapChain == nullptr) {
+			m_swapChain = std::make_unique<VulkanSwapChain>(m_device, extent);
+		}
+		else {
+			m_swapChain = std::make_unique<VulkanSwapChain>(m_device, extent, std::move(m_swapChain));
+			if (m_swapChain->imageCount() != m_commandBuffers.size()) {
+				freeCommandBuffers();
+				createCommandBuffers();
+			}
+		}
+
+
+		// TODO if render pass is compatible do not recreate pipeline
 		createPipeline();
 	}
 
@@ -82,6 +97,15 @@ namespace aph {
 		if (vkAllocateCommandBuffers(m_device.device(), &allocInfo, m_commandBuffers.data()) != VK_SUCCESS) {
 			throw std::runtime_error("failed to allocate command buffers");
 		}
+	}
+
+	void GameApp::freeCommandBuffers() {
+		vkFreeCommandBuffers(
+			m_device.device(),
+			m_device.getCommandPool(),
+			static_cast<uint32_t>(m_commandBuffers.size()),
+			m_commandBuffers.data());
+		m_commandBuffers.clear();
 	}
 
 	void GameApp::recordCommandBuffer(int imageIndex) {
@@ -107,6 +131,17 @@ namespace aph {
 		renderPassInfo.pClearValues = clearValues.data();
 
 		vkCmdBeginRenderPass(m_commandBuffers[imageIndex], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+		VkViewport viewport{};
+		viewport.x = 0.0f;
+		viewport.y = 0.0f;
+		viewport.width = static_cast<float>(m_swapChain->getSwapChainExtent().width);
+		viewport.height = static_cast<float>(m_swapChain->getSwapChainExtent().height);
+		viewport.minDepth = 0.0f;
+		viewport.maxDepth = 1.0f;
+		VkRect2D scissor{ {0, 0},m_swapChain->getSwapChainExtent() };
+		vkCmdSetViewport(m_commandBuffers[imageIndex], 0, 1, &viewport);
+		vkCmdSetScissor(m_commandBuffers[imageIndex], 0, 1, &scissor);
 
 		m_pipeline->bind(m_commandBuffers[imageIndex]);
 		m_model->bind(m_commandBuffers[imageIndex]);

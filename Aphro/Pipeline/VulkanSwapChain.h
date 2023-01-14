@@ -7,6 +7,7 @@
 #include <vulkan/vulkan.h>
 
 // std lib headers
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -17,6 +18,7 @@ namespace aph {
         static constexpr int MAX_FRAMES_IN_FLIGHT = 2;
 
         VulkanSwapChain(VulkanDevice& deviceRef, VkExtent2D windowExtent);
+        VulkanSwapChain(VulkanDevice& deviceRef, VkExtent2D windowExtent, std::shared_ptr<VulkanSwapChain> old);
         ~VulkanSwapChain();
 
         VulkanSwapChain(const VulkanSwapChain&) = delete;
@@ -40,6 +42,7 @@ namespace aph {
         VkResult submitCommandBuffers(const VkCommandBuffer* buffers, uint32_t* imageIndex);
 
     private:
+        void init();
         void createSwapChain();
         void createImageViews();
         void createDepthResources();
@@ -70,6 +73,7 @@ namespace aph {
         VkExtent2D windowExtent;
 
         VkSwapchainKHR swapChain;
+        std::shared_ptr<VulkanSwapChain> m_oldSwapChain;
 
         std::vector<VkSemaphore> imageAvailableSemaphores;
         std::vector<VkSemaphore> renderFinishedSemaphores;
