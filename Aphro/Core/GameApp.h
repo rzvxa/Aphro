@@ -13,8 +13,8 @@
 namespace aph {
 	class GameApp {
 	public:
-		static constexpr int WIDTH = 1920;
-		static constexpr int HEIGHT = 1080;
+		static constexpr int WIDTH = 800;
+		static constexpr int HEIGHT = 600;
 
 		GameApp();
 		~GameApp();
@@ -29,10 +29,12 @@ namespace aph {
 		void createPipeline();
 		void createCommandBuffers();
 		void drawFrame();
+		void recreateSwapChain();
+		void recordCommandBuffer(int imageIndex);
 
 		VulkanWindow m_window{ WIDTH, HEIGHT, "vkWindow" };
 		VulkanDevice m_device{ m_window };
-		VulkanSwapChain m_swapChain{ m_device, m_window.getExtend() };
+		std::unique_ptr<VulkanSwapChain> m_swapChain;
 		std::unique_ptr<VulkanPipeline> m_pipeline;
 		VkPipelineLayout m_pipelineLayout;
 		std::vector<VkCommandBuffer> m_commandBuffers;
