@@ -35,7 +35,12 @@ namespace aph {
 
 		VkCommandBuffer getCurrentCommandBuffer() const {
 			assert(m_isFrameStarted && "Cannot get command buffer when frame not in progress");
-			return m_commandBuffers[m_currentImageIndex];
+			return m_commandBuffers[m_currentFrameIndex];
+		}
+
+		int getFrameIndex() const { 
+			assert(m_isFrameStarted && "Cannot get command index when frame not in progress");
+			return m_currentFrameIndex;
 		}
 
 	private:
@@ -49,6 +54,7 @@ namespace aph {
 		std::vector<VkCommandBuffer> m_commandBuffers;
 
 		uint32_t m_currentImageIndex;
+		int m_currentFrameIndex{ 0 };
 		bool m_isFrameStarted{false};
 	};
 }

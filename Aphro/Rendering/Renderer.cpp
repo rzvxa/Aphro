@@ -25,10 +25,12 @@ namespace aph {
 		if (m_swapChain == nullptr) {
 			m_swapChain = std::make_unique<VulkanSwapChain>(m_device, extent);
 		} else {
-			m_swapChain = std::make_unique<VulkanSwapChain>(m_device, extent, std::move(m_swapChain));
-			if (m_swapChain->imageCount() != m_commandBuffers.size()) {
-				freeCommandBuffers();
-				createCommandBuffers();
+			std::shared_ptr<VulkanSwapChain> oldSwapChain = std::move(m_swapChain);
+			m_swapChain = std::make_unique<VulkanSwapChain>(m_device, extent, oldSwapChain);
+
+			if (!oldSwapChain->compareSwapFormats(*m_swapChain.get())) {
+				// TODO callback incompatible render pass
+				throw std::runtime_error("Swap chain image(or depth) format has changed");
 			}
 		}
 
@@ -37,7 +39,7 @@ namespace aph {
 	}
 
 	void Renderer::createCommandBuffers() {
-		m_commandBuffers.resize(m_swapChain->imageCount());
+		m_commandBuffers.resize(VulkanSwapChain::MAX_FRAMES_IN_FLIGHT);
 
 		VkCommandBufferAllocateInfo allocInfo{};
 		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -102,6 +104,7 @@ namespace aph {
 			throw std::runtime_error("failed to acquire swap chain image");
 		}
 		m_isFrameStarted = false;
+		m_currentFrameIndex = (m_currentFrameIndex + 1) % VulkanSwapChain::MAX_FRAMES_IN_FLIGHT;
 	}
 
 	void Renderer::beginSwapChainRenderPass(VkCommandBuffer commandBuffer) {
