@@ -27,7 +27,7 @@ set(MODULE_FILES
 		Pipeline/VulkanDevice.cpp
 		Pipeline/VulkanSwapChain.h
 		Pipeline/VulkanSwapChain.cpp
- "Graphics/Model.h" "Graphics/Model.cpp")
+ "Graphics/Model.h" "Graphics/Model.cpp" "Core/GameObject.h")
 
 
 add_library(Aphro STATIC ${MODULE_FILES})

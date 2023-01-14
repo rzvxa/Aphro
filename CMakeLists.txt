@@ -16,6 +16,13 @@ set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 
 find_package(Vulkan REQUIRED)
+find_package( PythonInterp 3 REQUIRED )
+
+add_custom_target(
+ CompileAphroShaders
+ COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/Scripts/compile_shaders.py
+ COMMENT "Compiling Aphro Shaders"
+)
 
 # Try extracting VulkanSDK path from ${Vulkan_INCLUDE_DIRS}
 if (NOT ${Vulkan_INCLUDE_DIRS} STREQUAL "")
@@ -34,7 +41,9 @@ include_directories(AFTER ${VULKAN_PATH}/Include)
 add_subdirectory(Vendor/glfw)
 add_subdirectory(Vendor/glm)
 add_subdirectory(Aphro)
+
 add_subdirectory(Sandbox)
+
 
 
 # USE_FOLDERS group cmake generated projects into one (CMakePredefinedTargets) folder
