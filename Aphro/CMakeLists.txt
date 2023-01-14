@@ -21,6 +21,8 @@ set(MODULE_FILES
 		Window/VulkanWindow.h
 		Core/GameApp.h
 		Core/GameApp.cpp
+		Rendering/Renderer.h
+		Rendering/Renderer.cpp
 		Rendering/Vulkan/VulkanDevice.h
 		Rendering/Vulkan/VulkanDevice.cpp
 		Rendering/Vulkan/VulkanPipeline.h
@@ -29,7 +31,9 @@ set(MODULE_FILES
 		Rendering/Vulkan/VulkanSwapChain.cpp
 		Rendering/Mesh.h
 		Rendering/Mesh.cpp
-		Core/GameObject.h)
+		Rendering/SimpleRenderPipeline.h
+		Core/GameObject.h
+ "Rendering/SimpleRenderPipeline.cpp")
 
 
 add_library(Aphro STATIC ${MODULE_FILES})

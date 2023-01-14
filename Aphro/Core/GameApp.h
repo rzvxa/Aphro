@@ -3,9 +3,8 @@
 
 #include "GameObject.h"
 #include "../Window/VulkanWindow.h";
-#include "../Rendering/Vulkan/VulkanPipeline.h";
 #include "../Rendering/Vulkan/VulkanDevice.h";
-#include "../Rendering/Vulkan/VulkanSwapChain.h"
+#include "../Rendering/Renderer.h"
 
 // glm
 #define GLM_FORCE_RADIANS
@@ -38,21 +37,11 @@ namespace aph {
 		void run();
 	private:
 		void loadGameObjects();
-		void createPipelineLayout();
-		void createPipeline();
-		void createCommandBuffers();
-		void freeCommandBuffers();
-		void drawFrame();
-		void recreateSwapChain();
-		void recordCommandBuffer(int imageIndex);
-		void renderGameObjects(VkCommandBuffer commandBuffer);
 
 		VulkanWindow m_window{ WIDTH, HEIGHT, "vkWindow" };
 		VulkanDevice m_device{ m_window };
-		std::unique_ptr<VulkanSwapChain> m_swapChain;
-		std::unique_ptr<VulkanPipeline> m_pipeline;
-		VkPipelineLayout m_pipelineLayout;
-		std::vector<VkCommandBuffer> m_commandBuffers;
+		Renderer m_renderer{ m_window, m_device };
+
 		std::vector<GameObject> m_gameObjects;
 	};
 }
