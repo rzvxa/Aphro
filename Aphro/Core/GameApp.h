@@ -5,6 +5,7 @@
 #include "../Pipeline/VulkanPipeline.h";
 #include "../Pipeline/VulkanDevice.h";
 #include "../Pipeline/VulkanSwapChain.h"
+#include "../Graphics/Model.h"
 
 #include <memory>
 #include <vector>
@@ -23,6 +24,7 @@ namespace aph {
 
 		void run();
 	private:
+		void loadModels();
 		void createPipelineLayout();
 		void createPipeline();
 		void createCommandBuffers();
@@ -34,6 +36,7 @@ namespace aph {
 		std::unique_ptr<VulkanPipeline> m_pipeline;
 		VkPipelineLayout m_pipelineLayout;
 		std::vector<VkCommandBuffer> m_commandBuffers;
+		std::unique_ptr<Model> m_model;
 	};
 }
 

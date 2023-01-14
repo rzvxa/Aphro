@@ -27,13 +27,14 @@ set(MODULE_FILES
 		Pipeline/VulkanDevice.cpp
 		Pipeline/VulkanSwapChain.h
 		Pipeline/VulkanSwapChain.cpp
-)
+ "Graphics/Model.h" "Graphics/Model.cpp")
 
 
 add_library(Aphro STATIC ${MODULE_FILES})
 
 target_link_libraries(Aphro ${Vulkan_LIBRARIES})
 target_link_libraries(Aphro glfw)
+target_link_libraries(Aphro glm)
 
 
 # Make sure the compiler can find include files for our Aphro library

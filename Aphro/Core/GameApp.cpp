@@ -6,6 +6,7 @@
 namespace aph {
 
 	GameApp::GameApp() {
+		loadModels();
 		createPipelineLayout();
 		createPipeline();
 		createCommandBuffers();
@@ -22,6 +23,15 @@ namespace aph {
 		}
 
 		vkDeviceWaitIdle(m_device.device());
+	}
+
+	void GameApp::loadModels() {
+		std::vector<Model::Vertex> vertecies{
+			{{0.0f, -0.5f}},
+			{{0.5f, 0.5f}},
+			{{-0.5f, 0.5f}}
+		};
+		m_model = std::make_unique<Model>(m_device, vertecies);
 	}
 
 	void GameApp::createPipelineLayout() {
@@ -85,7 +95,9 @@ namespace aph {
 			vkCmdBeginRenderPass(m_commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
 			m_pipeline->bind(m_commandBuffers[i]);
-			vkCmdDraw(m_commandBuffers[i], 3, 1, 0, 0);
+			m_model->bind(m_commandBuffers[i]);
+			m_model->draw(m_commandBuffers[i]);
+			//vkCmdDraw(m_commandBuffers[i], 3, 1, 0, 0);
 
 			vkCmdEndRenderPass(m_commandBuffers[i]);
 			if (vkEndCommandBuffer(m_commandBuffers[i]) != VK_SUCCESS) {
