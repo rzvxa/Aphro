@@ -1,7 +1,7 @@
 #ifndef APH_VULKAN_DEVICE_H
 #define APH_VULKAN_DEVICE_H
 
-#include "../Window/VulkanWindow.h"
+#include "../../Window/VulkanWindow.h"
 
 #include <string>
 #include <vector>

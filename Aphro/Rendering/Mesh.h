@@ -1,7 +1,7 @@
-#ifndef APH_MODEL_H
-#define APH_MODEL_H
+#ifndef APH_MESH_H
+#define APH_MESH_H
 
-#include "../Pipeline/VulkanDevice.h"
+#include "../Rendering/Vulkan/VulkanDevice.h"
 
 // glm
 #define GLM_FORCE_RADIANS
@@ -11,7 +11,7 @@
 #include <vector>
 
 namespace aph {
-	class Model {
+	class Mesh {
 	public:
 
 		struct Vertex {
@@ -21,11 +21,11 @@ namespace aph {
 			static std::vector<VkVertexInputBindingDescription> getBindingDescriptions();
 			static std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions();
 		};
-		Model(VulkanDevice& device, const std::vector<Vertex>& vertecies);
-		~Model();
+		Mesh(VulkanDevice& device, const std::vector<Vertex>& vertecies);
+		~Mesh();
 
-		Model(const Model&) = delete;
-		Model& operator=(const Model&) = delete;
+		Mesh(const Mesh&) = delete;
+		Mesh& operator=(const Mesh&) = delete;
 
 		void bind(VkCommandBuffer commandBuffer);
 		void draw(VkCommandBuffer commandBuffer);
@@ -40,4 +40,4 @@ namespace aph {
 	};
 }
 
-#endif // !APH_MODEL_H
+#endif // !APH_Mesh_H

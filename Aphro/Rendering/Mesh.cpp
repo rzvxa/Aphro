@@ -1,17 +1,17 @@
-#include "Model.h"
+#include "Mesh.h"
 
 namespace aph {
 
-	Model::Model(VulkanDevice& device, const std::vector<Vertex>& vertecies) : m_device(device) {
+	Mesh::Mesh(VulkanDevice& device, const std::vector<Vertex>& vertecies) : m_device(device) {
 		createVertexBuffers(vertecies);
 	}
 
-	Model::~Model() {
+	Mesh::~Mesh() {
 		vkDestroyBuffer(m_device.device(), m_vertexBuffer, nullptr);
 		vkFreeMemory(m_device.device(), m_vertexBufferMemory, nullptr);
 	}
 
-	void Model::createVertexBuffers(const std::vector<Vertex>& vertecies) {
+	void Mesh::createVertexBuffers(const std::vector<Vertex>& vertecies) {
 		m_vertexCount = static_cast<uint32_t>(vertecies.size());
 		assert(m_vertexCount >= 3 && "Vertex count must be at least 3");
 		VkDeviceSize bufferSize = sizeof(vertecies[0]) * m_vertexCount;
@@ -28,17 +28,17 @@ namespace aph {
 		vkUnmapMemory(m_device.device(), m_vertexBufferMemory);
 	}
 
-	void Model::bind(VkCommandBuffer commandBuffer) {
+	void Mesh::bind(VkCommandBuffer commandBuffer) {
 		VkBuffer buffers[] = { m_vertexBuffer };
 		VkDeviceSize offsets[] = { 0 };
 		vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers, offsets);
 	}
 
-	void Model::draw(VkCommandBuffer commandBuffer) {
+	void Mesh::draw(VkCommandBuffer commandBuffer) {
 		vkCmdDraw(commandBuffer, m_vertexCount, 1, 0, 0);
 	}
 
-	std::vector<VkVertexInputBindingDescription> Model::Vertex::getBindingDescriptions() {
+	std::vector<VkVertexInputBindingDescription> Mesh::Vertex::getBindingDescriptions() {
 		std::vector<VkVertexInputBindingDescription> bindingDescriptions(1);
 		bindingDescriptions[0].binding = 0;
 		bindingDescriptions[0].stride = sizeof(Vertex);
@@ -46,7 +46,7 @@ namespace aph {
 		return bindingDescriptions;
 	}
 
-	std::vector<VkVertexInputAttributeDescription> Model::Vertex::getAttributeDescriptions() {
+	std::vector<VkVertexInputAttributeDescription> Mesh::Vertex::getAttributeDescriptions() {
 		std::vector<VkVertexInputAttributeDescription> attributeDescriptions(2);
 
 		attributeDescriptions[0].binding = 0;

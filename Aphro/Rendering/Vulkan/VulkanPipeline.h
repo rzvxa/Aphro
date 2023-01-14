@@ -2,7 +2,7 @@
 #define APH_VULKAN_PIPELINE_H
 
 #include "VulkanDevice.h"
-#include "../Graphics/Model.h"
+#include "../Mesh.h"
 
 #include <string>
 #include <vector>

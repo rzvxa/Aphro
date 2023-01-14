@@ -19,15 +19,17 @@ endif()
 set(MODULE_FILES
 		Window/VulkanWindow.cpp
 		Window/VulkanWindow.h
-		Pipeline/VulkanPipeline.h
-		Pipeline/VulkanPipeline.cpp
 		Core/GameApp.h
 		Core/GameApp.cpp
-		Pipeline/VulkanDevice.h
-		Pipeline/VulkanDevice.cpp
-		Pipeline/VulkanSwapChain.h
-		Pipeline/VulkanSwapChain.cpp
- "Graphics/Model.h" "Graphics/Model.cpp" "Core/GameObject.h")
+		Rendering/Vulkan/VulkanDevice.h
+		Rendering/Vulkan/VulkanDevice.cpp
+		Rendering/Vulkan/VulkanPipeline.h
+		Rendering/Vulkan/VulkanPipeline.cpp
+		Rendering/Vulkan/VulkanSwapChain.h
+		Rendering/Vulkan/VulkanSwapChain.cpp
+		Rendering/Mesh.h
+		Rendering/Mesh.cpp
+		Core/GameObject.h)
 
 
 add_library(Aphro STATIC ${MODULE_FILES})

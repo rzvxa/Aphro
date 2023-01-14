@@ -6,7 +6,7 @@
 namespace aph {
 
 	GameApp::GameApp() {
-		loadModels();
+		loadGameObjects();
 		createPipelineLayout();
 		recreateSwapChain();
 		createCommandBuffers();
@@ -25,22 +25,36 @@ namespace aph {
 		vkDeviceWaitIdle(m_device.device());
 	}
 
-	void GameApp::loadModels() {
-		std::vector<Model::Vertex> vertecies{
+	void GameApp::loadGameObjects() {
+		std::vector<Mesh::Vertex> vertecies{
 			{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
 			{{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
 			{{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
 		};
-		m_model = std::make_unique<Model>(m_device, vertecies);
+		auto mesh = std::make_shared<Mesh>(m_device, vertecies);
+		auto go = GameObject::createGameObject();
+		go.mesh = mesh;
+		go.color = { .1f, .8f, .1f };
+		go.transform2d.translation.x = .2f;
+		go.transform2d.scale = { 2.f, .5f };
+		go.transform2d.rotation = .25f * glm::two_pi<float>();
+
+		m_gameObjects.push_back(std::move(go));
 	}
 
 	void GameApp::createPipelineLayout() {
+
+		VkPushConstantRange pushConstantRange{};
+		pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+		pushConstantRange.offset = 0;
+		pushConstantRange.size = sizeof(SimplePushConstantData);
+
 		VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo{};
 		pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 		pipelineLayoutCreateInfo.setLayoutCount = 0;
 		pipelineLayoutCreateInfo.pSetLayouts = nullptr;
-		pipelineLayoutCreateInfo.pushConstantRangeCount = 0;
-		pipelineLayoutCreateInfo.pPushConstantRanges = nullptr;
+		pipelineLayoutCreateInfo.pushConstantRangeCount = 1;
+		pipelineLayoutCreateInfo.pPushConstantRanges = &pushConstantRange;
 		if (vkCreatePipelineLayout(m_device.device(), &pipelineLayoutCreateInfo, nullptr, &m_pipelineLayout) != VK_SUCCESS) {
 			throw std::runtime_error("failed to create pipeline layout");
 		}
@@ -71,8 +85,7 @@ namespace aph {
 		vkDeviceWaitIdle(m_device.device());
 		if (m_swapChain == nullptr) {
 			m_swapChain = std::make_unique<VulkanSwapChain>(m_device, extent);
-		}
-		else {
+		} else {
 			m_swapChain = std::make_unique<VulkanSwapChain>(m_device, extent, std::move(m_swapChain));
 			if (m_swapChain->imageCount() != m_commandBuffers.size()) {
 				freeCommandBuffers();
@@ -143,14 +156,34 @@ namespace aph {
 		vkCmdSetViewport(m_commandBuffers[imageIndex], 0, 1, &viewport);
 		vkCmdSetScissor(m_commandBuffers[imageIndex], 0, 1, &scissor);
 
-		m_pipeline->bind(m_commandBuffers[imageIndex]);
-		m_model->bind(m_commandBuffers[imageIndex]);
-		m_model->draw(m_commandBuffers[imageIndex]);
-		//vkCmdDraw(m_commandBuffers[i], 3, 1, 0, 0);
+		renderGameObjects(m_commandBuffers[imageIndex]);
+
+		//vkCmdDraw(m_commandBuffers[imageIndex], 3, 1, 0, 0);
 
 		vkCmdEndRenderPass(m_commandBuffers[imageIndex]);
 		if (vkEndCommandBuffer(m_commandBuffers[imageIndex]) != VK_SUCCESS) {
 			throw std::runtime_error("failed to record command buffer");
+		}
+	}
+
+	void GameApp::renderGameObjects(VkCommandBuffer commandBuffer) {
+		m_pipeline->bind(commandBuffer);
+
+		for (auto& go : m_gameObjects) {
+			SimplePushConstantData push{};
+			push.offset = go.transform2d.translation;
+			push.color = go.color;
+			push.transform = go.transform2d.mat2();
+
+			vkCmdPushConstants(
+				commandBuffer,
+				m_pipelineLayout,
+				VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+				0,
+				sizeof(SimplePushConstantData),
+				&push);
+			go.mesh->bind(commandBuffer);
+			go.mesh->draw(commandBuffer);
 		}
 	}
 

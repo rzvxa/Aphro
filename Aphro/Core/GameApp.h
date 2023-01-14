@@ -1,16 +1,29 @@
 #ifndef APH_GAME_APP_H
 #define APH_GAME_APP_H
 
+#include "GameObject.h"
 #include "../Window/VulkanWindow.h";
-#include "../Pipeline/VulkanPipeline.h";
-#include "../Pipeline/VulkanDevice.h";
-#include "../Pipeline/VulkanSwapChain.h"
-#include "../Graphics/Model.h"
+#include "../Rendering/Vulkan/VulkanPipeline.h";
+#include "../Rendering/Vulkan/VulkanDevice.h";
+#include "../Rendering/Vulkan/VulkanSwapChain.h"
+
+// glm
+#define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#include <glm/glm.hpp>
+#include <glm/gtc/constants.hpp>
 
 #include <memory>
 #include <vector>
 
 namespace aph {
+
+	struct SimplePushConstantData {
+		glm::mat2 transform{1.0f};
+		glm::vec2 offset;
+		alignas(16) glm::vec3 color;
+	};
+
 	class GameApp {
 	public:
 		static constexpr int WIDTH = 800;
@@ -24,7 +37,7 @@ namespace aph {
 
 		void run();
 	private:
-		void loadModels();
+		void loadGameObjects();
 		void createPipelineLayout();
 		void createPipeline();
 		void createCommandBuffers();
@@ -32,6 +45,7 @@ namespace aph {
 		void drawFrame();
 		void recreateSwapChain();
 		void recordCommandBuffer(int imageIndex);
+		void renderGameObjects(VkCommandBuffer commandBuffer);
 
 		VulkanWindow m_window{ WIDTH, HEIGHT, "vkWindow" };
 		VulkanDevice m_device{ m_window };
@@ -39,7 +53,7 @@ namespace aph {
 		std::unique_ptr<VulkanPipeline> m_pipeline;
 		VkPipelineLayout m_pipelineLayout;
 		std::vector<VkCommandBuffer> m_commandBuffers;
-		std::unique_ptr<Model> m_model;
+		std::vector<GameObject> m_gameObjects;
 	};
 }
 
