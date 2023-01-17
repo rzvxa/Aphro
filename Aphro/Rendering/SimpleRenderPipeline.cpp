@@ -12,8 +12,7 @@
 namespace aph {
 
 	struct SimplePushConstantData {
-		glm::mat2 transform{ 1.0f };
-		glm::vec2 offset;
+		glm::mat4 transform{ 1.0f };
 		alignas(16) glm::vec3 color;
 	};
 
@@ -62,10 +61,12 @@ namespace aph {
 		m_pipeline->bind(commandBuffer);
 
 		for (auto& go : gameObjects) {
+			go.transform.rotation.y = glm::mod(go.transform.rotation.y + 0.001f, glm::two_pi<float>());
+			go.transform.rotation.x = glm::mod(go.transform.rotation.x + 0.0005f, glm::two_pi<float>());
+
 			SimplePushConstantData push{};
-			push.offset = go.transform2d.translation;
 			push.color = go.color;
-			push.transform = go.transform2d.mat2();
+			push.transform = go.transform.mat4();
 
 			vkCmdPushConstants(
 				commandBuffer,
