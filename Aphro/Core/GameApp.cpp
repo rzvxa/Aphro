@@ -1,5 +1,6 @@
 #include "GameApp.h"
 
+#include "Camera.h"
 #include "../Rendering/SimpleRenderPipeline.h"
 
 #include <stdexcept>
@@ -15,13 +16,19 @@ namespace aph {
 
 	void GameApp::run() {
 		SimpleRenderPipeline renderPipeline{ m_device, m_renderer.getSwapChainRenderPass() };
+        Camera camera{};
+        //camera.setViewDirection(glm::vec3(.0f, .0f, -1.f), glm::vec3(.5f, .0f, 1.f));
+        camera.setViewTarget(glm::vec3(-1.0f, -2.0f, 2.f), glm::vec3(.0f, .0f, 2.5f));
 
 		while (!m_window.shouldClose()) {
 			glfwPollEvents();
+            float aspectRatio = m_renderer.getAspectRatio();
+            //camera.setOrthographicProjection(-aspectRatio, aspectRatio, -1, 1, -1, 1);
+            camera.setPrespectiveProjection(glm::radians(50.f), aspectRatio, .01f, 10.f);
 
 			if (auto commandBuffer = m_renderer.beginFrame()) {
 				m_renderer.beginSwapChainRenderPass(commandBuffer);
-				renderPipeline.renderGameObjects(commandBuffer, m_gameObjects);
+				renderPipeline.renderGameObjects(commandBuffer, m_gameObjects, camera);
 				m_renderer.endSwapChainRenderPass(commandBuffer);
 				m_renderer.endFrame();
 			}
@@ -92,7 +99,7 @@ namespace aph {
         std::shared_ptr<Mesh> mesh = createCubeMesh(m_device, { .0f, .0f, .0f });
         auto cube = GameObject::createGameObject();
         cube.mesh = mesh;
-        cube.transform.translation = { .0f, .0f, .5f };
+        cube.transform.translation = { .0f, .0f, 2.5f };
         cube.transform.scale = { .5f, .5f, .5f };
 
         m_gameObjects.push_back(std::move(cube));

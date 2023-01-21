@@ -20,6 +20,9 @@ set(MODULE_FILES
 		Window/VulkanWindow.cpp
 		Window/VulkanWindow.h
 		Core/GameApp.h
+		Core/Camera.h
+		Core/Camera.cpp
+		Core/GameObject.h
 		Core/GameApp.cpp
 		Rendering/Renderer.h
 		Rendering/Renderer.cpp
@@ -32,8 +35,8 @@ set(MODULE_FILES
 		Rendering/Mesh.h
 		Rendering/Mesh.cpp
 		Rendering/SimpleRenderPipeline.h
-		Core/GameObject.h
- "Rendering/SimpleRenderPipeline.cpp")
+		Rendering/SimpleRenderPipeline.cpp
+)
 
 
 add_library(Aphro STATIC ${MODULE_FILES})

@@ -57,8 +57,13 @@ namespace aph {
 			pipelineConfigInfo);
 	}
 
-	void SimpleRenderPipeline::renderGameObjects(VkCommandBuffer commandBuffer, std::vector<GameObject>& gameObjects) {
+	void SimpleRenderPipeline::renderGameObjects(
+		VkCommandBuffer commandBuffer,
+		std::vector<GameObject>& gameObjects,
+		const Camera& camera) {
 		m_pipeline->bind(commandBuffer);
+
+		auto projectionView = camera.getProjection() * camera.getView();
 
 		for (auto& go : gameObjects) {
 			go.transform.rotation.y = glm::mod(go.transform.rotation.y + 0.001f, glm::two_pi<float>());
@@ -66,7 +71,7 @@ namespace aph {
 
 			SimplePushConstantData push{};
 			push.color = go.color;
-			push.transform = go.transform.mat4();
+			push.transform = projectionView * go.transform.mat4(); // TODO push this into shader
 
 			vkCmdPushConstants(
 				commandBuffer,
