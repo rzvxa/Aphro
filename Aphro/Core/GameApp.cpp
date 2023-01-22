@@ -22,15 +22,16 @@ namespace aph {
 	GameApp::~GameApp() {}
 
 	void GameApp::run(std::function<void (GLFWwindow*, GameObject&, float)> update) {
-		VulkanBuffer globalUboBuffer{
-			m_device,
-			sizeof(GlobalUbo),
-			VulkanSwapChain::MAX_FRAMES_IN_FLIGHT,
-			VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
-			m_device.properties.limits.minUniformBufferOffsetAlignment,
-		};
-		globalUboBuffer.map();
+		std::vector<std::unique_ptr<VulkanBuffer>> uboBuffers(VulkanSwapChain::MAX_FRAMES_IN_FLIGHT);
+		for (int i = 0; i < uboBuffers.size(); ++i) {
+			uboBuffers[i] = std::make_unique<VulkanBuffer>(
+				m_device,
+				sizeof(GlobalUbo),
+				1,
+				VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+				VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+			uboBuffers[i]->map();
+		}
 
 		SimpleRenderPipeline renderPipeline{ m_device, m_renderer.getSwapChainRenderPass() };
         Camera camera{};
@@ -66,8 +67,8 @@ namespace aph {
 				// update
 				GlobalUbo ubo{};
 				ubo.projectionView = camera.getProjection() * camera.getView();
-				globalUboBuffer.writeToIndex(&ubo, frameIndex);
-				globalUboBuffer.flushIndex(frameIndex);
+				uboBuffers[frameIndex]->writeToBuffer(&ubo);
+				uboBuffers[frameIndex]->flush();
 
 				// render
 				m_renderer.beginSwapChainRenderPass(commandBuffer);
