@@ -14,6 +14,7 @@
 
 #include <memory>
 #include <vector>
+#include <functional>
 
 namespace aph {
 
@@ -28,7 +29,7 @@ namespace aph {
 		GameApp(const GameApp&) = delete;
 		GameApp& operator=(const GameApp&) = delete;
 
-		void run();
+		void run(std::function<void (GLFWwindow*, GameObject&, float)> update);
 	private:
 		void loadGameObjects();
 

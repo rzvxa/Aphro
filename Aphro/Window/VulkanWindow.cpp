@@ -8,7 +8,7 @@ namespace aph {
 	}
 
 	VulkanWindow::~VulkanWindow() {
-		glfwDestroyWindow(window);
+		glfwDestroyWindow(m_window);
 		glfwTerminate();
 	}
 
@@ -18,13 +18,13 @@ namespace aph {
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
-		window = glfwCreateWindow(m_width, m_height, m_windowName.c_str(), nullptr, nullptr);
-		glfwSetWindowUserPointer(window, this);
-		glfwSetFramebufferSizeCallback(window, frameBufferResizeCallback);
+		m_window = glfwCreateWindow(m_width, m_height, m_windowName.c_str(), nullptr, nullptr);
+		glfwSetWindowUserPointer(m_window, this);
+		glfwSetFramebufferSizeCallback(m_window, frameBufferResizeCallback);
 	}
 
 	void VulkanWindow::createWindowSurface(VkInstance instance, VkSurfaceKHR* surface) {
-		if (glfwCreateWindowSurface(instance, window, nullptr, surface) != VK_SUCCESS) {
+		if (glfwCreateWindowSurface(instance, m_window, nullptr, surface) != VK_SUCCESS) {
 			throw std::runtime_error("failed to create window surface");
 		}
 	}

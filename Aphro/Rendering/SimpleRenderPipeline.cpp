@@ -66,9 +66,6 @@ namespace aph {
 		auto projectionView = camera.getProjection() * camera.getView();
 
 		for (auto& go : gameObjects) {
-			go.transform.rotation.y = glm::mod(go.transform.rotation.y + 0.001f, glm::two_pi<float>());
-			go.transform.rotation.x = glm::mod(go.transform.rotation.x + 0.0005f, glm::two_pi<float>());
-
 			SimplePushConstantData push{};
 			push.color = go.color;
 			push.transform = projectionView * go.transform.mat4(); // TODO push this into shader

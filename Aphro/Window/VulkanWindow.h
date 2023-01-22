@@ -15,10 +15,11 @@ namespace aph {
 		VulkanWindow(const VulkanWindow&) = delete;
 		VulkanWindow& operator=(const VulkanWindow&) = delete;
 
-		bool shouldClose() { return glfwWindowShouldClose(window); };
-		VkExtent2D getExtend() { return { static_cast<uint32_t>(m_width), static_cast<uint32_t>(m_height) }; };
+		bool shouldClose() { return glfwWindowShouldClose(m_window); }
+		VkExtent2D getExtend() { return { static_cast<uint32_t>(m_width), static_cast<uint32_t>(m_height) }; }
 		bool wasWindowResized() { return m_frameBufferResized; }
 		void resetWindowResizedFlag() { m_frameBufferResized = false; }
+		GLFWwindow* getGLFWwindow() const { return m_window; }
 
 		void createWindowSurface(VkInstance instance, VkSurfaceKHR* surface);
 	private:
@@ -30,7 +31,7 @@ namespace aph {
 		bool m_frameBufferResized = false;
 
 		std::string m_windowName;
-		GLFWwindow* window;
+		GLFWwindow* m_window;
 	};
 }
 

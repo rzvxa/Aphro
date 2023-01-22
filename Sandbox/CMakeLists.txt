@@ -10,7 +10,7 @@ add_custom_target(
 	COMMENT "Copying Aphro Shaders"
 )
 
-add_executable (Sandbox "main.cpp")
+add_executable (Sandbox main.cpp SimpleMovementController.h SimpleMovementController.cpp)
 add_dependencies(Sandbox AphroShaders)
 
 target_link_libraries(Sandbox
