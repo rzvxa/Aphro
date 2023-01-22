@@ -13,7 +13,7 @@ namespace aph {
 
 	struct SimplePushConstantData {
 		glm::mat4 transform{ 1.0f };
-		alignas(16) glm::vec3 color;
+		glm::mat4 modelMatrix{ 1.f };
 	};
 
 	SimpleRenderPipeline::SimpleRenderPipeline(VulkanDevice& device, VkRenderPass renderPass) : m_device(device) {
@@ -67,8 +67,9 @@ namespace aph {
 
 		for (auto& go : gameObjects) {
 			SimplePushConstantData push{};
-			push.color = go.color;
-			push.transform = projectionView * go.transform.mat4(); // TODO push this into shader
+			auto modelMatrix = go.transform.mat4();
+			push.transform = projectionView * modelMatrix; // TODO push this into shader
+			push.modelMatrix = modelMatrix;
 
 			vkCmdPushConstants(
 				commandBuffer,

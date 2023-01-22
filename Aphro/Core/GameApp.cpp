@@ -53,7 +53,7 @@ namespace aph {
 		std::shared_ptr<Mesh> mesh = Mesh::createMeshFromFile(m_device, "Assets/Aphro/Models/smooth_vase.obj");
         auto cube = GameObject::createGameObject();
         cube.mesh = mesh;
-        cube.transform.translation = { .0f, .0f, 2.5f };
+        cube.transform.translation = { .0f, .5f, 2.5f };
 		cube.transform.scale = glm::vec3{ 3.f };
 
         m_gameObjects.push_back(std::move(cube));
