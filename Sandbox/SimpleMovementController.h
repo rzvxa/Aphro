@@ -19,13 +19,16 @@ namespace sandbox {
             int lookRight = GLFW_KEY_RIGHT;
             int lookUp = GLFW_KEY_UP;
             int lookDown = GLFW_KEY_DOWN;
+            int orbitMouseButton = GLFW_MOUSE_BUTTON_RIGHT;
         };
 
         void moveInPlaneXZ(GLFWwindow* window, float dt, aph::GameObject& gameObject);
 
         KeyMappings keys{};
         float moveSpeed{ 3.f };
-        float lookSpeed{ 1.5f };
+        float lookSpeed{ 5.f };
+    private:
+        glm::vec2 m_lastMousePosition{};
 	};
 }
 

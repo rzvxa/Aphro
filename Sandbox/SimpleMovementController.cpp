@@ -1,10 +1,30 @@
 #include "SimpleMovementController.h"
 
 #include <limits>
+#include <iostream>
 
 namespace sandbox {
 	void SimpleMovementController::moveInPlaneXZ(GLFWwindow* window, float dt, aph::GameObject& gameObject) {
+		double xpos, ypos;
+		glfwGetCursorPos(window, &xpos, &ypos);
+
 		glm::vec3 rotate{ 0 };
+		if (glfwGetMouseButton(window, keys.orbitMouseButton) == GLFW_PRESS) {
+			auto mousePosition = glm::vec2(xpos, ypos);
+			auto mouseDelta = m_lastMousePosition - mousePosition;
+			m_lastMousePosition = mousePosition;
+			if (!glm::all(glm::lessThan(glm::abs(mouseDelta), glm::vec2(std::numeric_limits<float>::epsilon())))) {
+
+				std::cout << "mouse pos (" << xpos << ", " << ypos << ")" << std::endl;
+				std::cout << "mouse delta (" << mouseDelta.x << ", " << mouseDelta.y << ")" << std::endl;
+				if (mouseDelta.x < 0) rotate.y += 1.f;
+				if (mouseDelta.x > 0) rotate.y -= 1.f;
+				if (mouseDelta.y < 0) rotate.x -= 1.f;
+				if (mouseDelta.y > 0) rotate.x += 1.f;
+			}
+		}
+
+
 		if (glfwGetKey(window, keys.lookRight) == GLFW_PRESS) rotate.y += 1.f;
 		if (glfwGetKey(window, keys.lookLeft) == GLFW_PRESS) rotate.y -= 1.f;
 		if (glfwGetKey(window, keys.lookUp) == GLFW_PRESS) rotate.x += 1.f;
