@@ -40,6 +40,7 @@ include_directories(AFTER ${VULKAN_PATH}/Include)
 # Include sub-projects.
 add_subdirectory(Vendor/glfw)
 add_subdirectory(Vendor/glm)
+add_subdirectory(Vendor/tinyobjloader)
 add_subdirectory(Aphro)
 
 add_subdirectory(Sandbox)

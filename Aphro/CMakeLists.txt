@@ -36,7 +36,7 @@ set(MODULE_FILES
 		Rendering/Mesh.cpp
 		Rendering/SimpleRenderPipeline.h
 		Rendering/SimpleRenderPipeline.cpp
-)
+ "Core/Utils.h")
 
 
 add_library(Aphro STATIC ${MODULE_FILES})
