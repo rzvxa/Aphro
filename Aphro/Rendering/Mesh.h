@@ -2,6 +2,7 @@
 #define APH_MESH_H
 
 #include "../Rendering/Vulkan/VulkanDevice.h"
+#include "../Rendering/Vulkan/VulkanBuffer.h"
 
 // glm
 #define GLM_FORCE_RADIANS
@@ -57,13 +58,11 @@ namespace aph {
 
 		VulkanDevice& m_device;
 
-		VkBuffer m_vertexBuffer;
-		VkDeviceMemory m_vertexBufferMemory;
+		std::unique_ptr<VulkanBuffer> m_vertexBuffer;
 		uint32_t m_vertexCount;
 		
 		bool m_hasIndexBuffer = false;
-		VkBuffer m_indexBuffer;
-		VkDeviceMemory m_indexBufferMemory;
+		std::unique_ptr<VulkanBuffer> m_indexBuffer;
 		uint32_t m_indexCount;
 	};
 }

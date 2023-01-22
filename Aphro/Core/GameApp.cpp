@@ -2,12 +2,18 @@
 
 #include "Camera.h"
 #include "../Rendering/SimpleRenderPipeline.h"
+#include "../Rendering/Vulkan/VulkanBuffer.h"
 
 #include <stdexcept>
 #include <chrono>
 #include <array>
 
 namespace aph {
+
+	struct GlobalUbo {
+		glm::mat4 projectionView{ 1.f };
+		glm::vec3 lightDirection = glm::normalize(glm::vec3{ 1.f, -3.f, -1.f });
+	};
 
 	GameApp::GameApp() {
 		loadGameObjects();
@@ -16,6 +22,16 @@ namespace aph {
 	GameApp::~GameApp() {}
 
 	void GameApp::run(std::function<void (GLFWwindow*, GameObject&, float)> update) {
+		VulkanBuffer globalUboBuffer{
+			m_device,
+			sizeof(GlobalUbo),
+			VulkanSwapChain::MAX_FRAMES_IN_FLIGHT,
+			VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
+			m_device.properties.limits.minUniformBufferOffsetAlignment,
+		};
+		globalUboBuffer.map();
+
 		SimpleRenderPipeline renderPipeline{ m_device, m_renderer.getSwapChainRenderPass() };
         Camera camera{};
         //camera.setViewDirection(glm::vec3(.0f, .0f, -1.f), glm::vec3(.5f, .0f, 1.f));
@@ -39,8 +55,23 @@ namespace aph {
             camera.setPrespectiveProjection(glm::radians(50.f), aspectRatio, .01f, 10.f);
 
 			if (auto commandBuffer = m_renderer.beginFrame()) {
+				int frameIndex = m_renderer.getFrameIndex();
+				FrameInfo frameInfo{
+					frameIndex,
+					deltaTime,
+					commandBuffer,
+					camera,
+				};
+
+				// update
+				GlobalUbo ubo{};
+				ubo.projectionView = camera.getProjection() * camera.getView();
+				globalUboBuffer.writeToIndex(&ubo, frameIndex);
+				globalUboBuffer.flushIndex(frameIndex);
+
+				// render
 				m_renderer.beginSwapChainRenderPass(commandBuffer);
-				renderPipeline.renderGameObjects(commandBuffer, m_gameObjects, camera);
+				renderPipeline.renderGameObjects(frameInfo, m_gameObjects);
 				m_renderer.endSwapChainRenderPass(commandBuffer);
 				m_renderer.endFrame();
 			}

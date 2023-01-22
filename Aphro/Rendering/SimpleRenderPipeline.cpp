@@ -58,12 +58,11 @@ namespace aph {
 	}
 
 	void SimpleRenderPipeline::renderGameObjects(
-		VkCommandBuffer commandBuffer,
-		std::vector<GameObject>& gameObjects,
-		const Camera& camera) {
-		m_pipeline->bind(commandBuffer);
+		FrameInfo& frameInfo,
+		std::vector<GameObject>& gameObjects) {
+		m_pipeline->bind(frameInfo.commandBuffer);
 
-		auto projectionView = camera.getProjection() * camera.getView();
+		auto projectionView = frameInfo.camera.getProjection() * frameInfo.camera.getView();
 
 		for (auto& go : gameObjects) {
 			SimplePushConstantData push{};
@@ -72,14 +71,14 @@ namespace aph {
 			push.modelMatrix = modelMatrix;
 
 			vkCmdPushConstants(
-				commandBuffer,
+				frameInfo.commandBuffer,
 				m_pipelineLayout,
 				VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
 				0,
 				sizeof(SimplePushConstantData),
 				&push);
-			go.mesh->bind(commandBuffer);
-			go.mesh->draw(commandBuffer);
+			go.mesh->bind(frameInfo.commandBuffer);
+			go.mesh->draw(frameInfo.commandBuffer);
 		}
 	}
 }

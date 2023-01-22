@@ -5,6 +5,7 @@
 #include "../Core/Camera.h"
 #include "Vulkan/VulkanPipeline.h";
 #include "Vulkan/VulkanDevice.h";
+#include "FrameInfo.h";
 
 
 #include <memory>
@@ -20,7 +21,9 @@ namespace aph {
 		SimpleRenderPipeline(const SimpleRenderPipeline&) = delete;
 		SimpleRenderPipeline& operator=(const SimpleRenderPipeline&) = delete;
 
-		void renderGameObjects(VkCommandBuffer commandBuffer, std::vector<GameObject>& gameObjects, const Camera& camera);
+		void renderGameObjects(
+			FrameInfo& frameInfo,
+			std::vector<GameObject>& gameObjects);
 
 	private:
 		void createPipelineLayout();
