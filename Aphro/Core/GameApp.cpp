@@ -12,16 +12,25 @@ namespace aph {
 
 	struct GlobalUbo {
 		glm::mat4 projectionView{ 1.f };
-		glm::vec3 lightDirection = glm::normalize(glm::vec3{ 1.f, -3.f, -1.f });
+		//glm::vec3 lightDirection = glm::normalize(glm::vec3{ 1.f, -3.f, -1.f });
+		
+		glm::vec4 ambientLightColor{ 1.f, 1.f, 1.f, .02f };
+		glm::vec3 lightPosition{ -1.f };
+		alignas(16) glm::vec4 lightColor{ 1.f };
 	};
 
 	GameApp::GameApp() {
+		m_globalPool =
+			VulkanDescriptorPool::Builder(m_device)
+			.setMaxSets(VulkanSwapChain::MAX_FRAMES_IN_FLIGHT)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VulkanSwapChain::MAX_FRAMES_IN_FLIGHT)
+			.build();
 		loadGameObjects();
 	}
 
 	GameApp::~GameApp() {}
 
-	void GameApp::run(std::function<void (GLFWwindow*, GameObject&, float)> update) {
+	void GameApp::run(std::function<void(GLFWwindow*, GameObject&, float)> update) {
 		std::vector<std::unique_ptr<VulkanBuffer>> uboBuffers(VulkanSwapChain::MAX_FRAMES_IN_FLIGHT);
 		for (int i = 0; i < uboBuffers.size(); ++i) {
 			uboBuffers[i] = std::make_unique<VulkanBuffer>(
@@ -33,27 +42,44 @@ namespace aph {
 			uboBuffers[i]->map();
 		}
 
-		SimpleRenderPipeline renderPipeline{ m_device, m_renderer.getSwapChainRenderPass() };
-        Camera camera{};
-        //camera.setViewDirection(glm::vec3(.0f, .0f, -1.f), glm::vec3(.5f, .0f, 1.f));
-        camera.setViewTarget(glm::vec3(-1.0f, -2.0f, 2.f), glm::vec3(.0f, .0f, 2.5f));
+		auto globalSetLayout = VulkanDescriptorSetLayout::Builder(m_device)
+			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT)
+			.build();
 
-        auto cameraObject = GameObject::createGameObject();
+		std::vector<VkDescriptorSet> globalDescriptorSets(VulkanSwapChain::MAX_FRAMES_IN_FLIGHT);
+		for (int i = 0; i < globalDescriptorSets.size(); ++i) {
+			auto bufferInfo = uboBuffers[i]->descriptorInfo();
+			VulkanDescriptorWriter(*globalSetLayout, *m_globalPool)
+				.writeBuffer(0, &bufferInfo)
+				.build(globalDescriptorSets[i]);
+		}
 
-        auto nowTime = std::chrono::high_resolution_clock::now();
+		SimpleRenderPipeline renderPipeline{
+			m_device,
+			m_renderer.getSwapChainRenderPass(),
+			globalSetLayout->getDescriptorSetLayout()
+		};
+		Camera camera{};
+		//camera.setViewDirection(glm::vec3(.0f, .0f, -1.f), glm::vec3(.5f, .0f, 1.f));
+		camera.setViewTarget(glm::vec3(-1.0f, -2.0f, 2.f), glm::vec3(.0f, .0f, 2.5f));
+
+		auto cameraObject = GameObject::createGameObject();
+		cameraObject.transform.translation.z = -2.5f;
+
+		auto nowTime = std::chrono::high_resolution_clock::now();
 
 		while (!m_window.shouldClose()) {
 			glfwPollEvents();
-            auto newTime = std::chrono::high_resolution_clock::now();
-            float deltaTime = std::chrono::duration<float, std::chrono::seconds::period>(newTime - nowTime).count();
-            nowTime = newTime;
+			auto newTime = std::chrono::high_resolution_clock::now();
+			float deltaTime = std::chrono::duration<float, std::chrono::seconds::period>(newTime - nowTime).count();
+			nowTime = newTime;
 
-            update(m_window.getGLFWwindow(), cameraObject, deltaTime);
-            camera.setViewYXZ(cameraObject.transform.translation, cameraObject.transform.rotation);
+			update(m_window.getGLFWwindow(), cameraObject, deltaTime);
+			camera.setViewYXZ(cameraObject.transform.translation, cameraObject.transform.rotation);
 
-            float aspectRatio = m_renderer.getAspectRatio();
-            //camera.setOrthographicProjection(-aspectRatio, aspectRatio, -1, 1, -1, 1);
-            camera.setPrespectiveProjection(glm::radians(50.f), aspectRatio, .01f, 10.f);
+			float aspectRatio = m_renderer.getAspectRatio();
+			//camera.setOrthographicProjection(-aspectRatio, aspectRatio, -1, 1, -1, 1);
+			camera.setPrespectiveProjection(glm::radians(50.f), aspectRatio, .01f, 10.f);
 
 			if (auto commandBuffer = m_renderer.beginFrame()) {
 				int frameIndex = m_renderer.getFrameIndex();
@@ -62,6 +88,8 @@ namespace aph {
 					deltaTime,
 					commandBuffer,
 					camera,
+					globalDescriptorSets[frameIndex],
+					m_gameObjects
 				};
 
 				// update
@@ -72,7 +100,7 @@ namespace aph {
 
 				// render
 				m_renderer.beginSwapChainRenderPass(commandBuffer);
-				renderPipeline.renderGameObjects(frameInfo, m_gameObjects);
+				renderPipeline.renderGameObjects(frameInfo);
 				m_renderer.endSwapChainRenderPass(commandBuffer);
 				m_renderer.endFrame();
 			}
@@ -83,11 +111,24 @@ namespace aph {
 
 	void GameApp::loadGameObjects() {
 		std::shared_ptr<Mesh> mesh = Mesh::createMeshFromFile(m_device, "Assets/Aphro/Models/smooth_vase.obj");
-        auto cube = GameObject::createGameObject();
-        cube.mesh = mesh;
-        cube.transform.translation = { .0f, .5f, 2.5f };
-		cube.transform.scale = glm::vec3{ 3.f };
+		auto v1 = GameObject::createGameObject();
+		v1.mesh = mesh;
+		v1.transform.translation = { -.5f, .5f, 0.f };
+		v1.transform.scale = glm::vec3{ 3.f };
+		m_gameObjects.emplace(v1.getId(), std::move(v1));
 
-        m_gameObjects.push_back(std::move(cube));
+		mesh = Mesh::createMeshFromFile(m_device, "Assets/Aphro/Models/smooth_vase.obj");
+		auto v2 = GameObject::createGameObject();
+		v2.mesh = mesh;
+		v2.transform.translation = { .5f, .5f, 0.f };
+		v2.transform.scale = glm::vec3{ 3.f };
+		m_gameObjects.emplace(v2.getId(), std::move(v2));
+
+		mesh = Mesh::createMeshFromFile(m_device, "Assets/Aphro/Models/quad.obj");
+		auto floor = GameObject::createGameObject();
+		floor.mesh = mesh;
+		floor.transform.translation = { .0f, .5f, 0.f };
+		floor.transform.scale = glm::vec3{ 3.f, 1.f, 3.f };
+		m_gameObjects.emplace(floor.getId(), std::move(floor));
 	}
 }

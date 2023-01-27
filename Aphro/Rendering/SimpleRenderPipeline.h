@@ -15,18 +15,16 @@ namespace aph {
 
 	class SimpleRenderPipeline {
 	public:
-		SimpleRenderPipeline(VulkanDevice& device, VkRenderPass renderPass);
+		SimpleRenderPipeline(VulkanDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout);
 		~SimpleRenderPipeline();
 
 		SimpleRenderPipeline(const SimpleRenderPipeline&) = delete;
 		SimpleRenderPipeline& operator=(const SimpleRenderPipeline&) = delete;
 
-		void renderGameObjects(
-			FrameInfo& frameInfo,
-			std::vector<GameObject>& gameObjects);
+		void renderGameObjects(FrameInfo& frameInfo);
 
 	private:
-		void createPipelineLayout();
+		void createPipelineLayout(VkDescriptorSetLayout globalSetLayout);
 		void createPipeline(VkRenderPass renderPass);
 
 		VulkanDevice& m_device;

@@ -5,28 +5,27 @@ layout(location = 1) in vec3 icolor;
 layout(location = 2) in vec3 inormal;
 layout(location = 3) in vec2 iuv;
 
+layout(location = 1) out vec3 oworldPosition;
+layout(location = 2) out vec3 oworldNormal;
 layout(location = 0) out vec3 ocolor;
 
+layout(set = 0, binding = 0) uniform GlobalUbo {
+	mat4 projectionViewMatrix;
+//	vec3 directionToLight;
+	vec4 ambientLightColor;
+	vec3 lightPosition;
+	vec4 lightColor;
+} ubo;
+
 layout(push_constant) uniform Push {
-	mat4 transform; // projection * view * model
+	mat4 modelMatrix;
 	mat4 normalMatrix;
 } push;
 
-const vec3 DIRECTION_TO_LIGHT = normalize(vec3(1.0, -3.0, -1.0));
-const float AMBIENT = 0.2;
-
 void main() {
-	gl_Position = push.transform * vec4(iposition, 1.0);
-
-	// Uniform
-	//	vec3 normalWorldSpace = normalize(mat3(push.modelMatrix) * inormal);
-
-	//	mat3 normalMatrix = transpose(inverse(mat3(push.modelMatrix)));
-	//	vec3 normalWorldSpace = normalize(normalMatrix * inormal);
-
-	vec3 normalWorldSpace = normalize(mat3(push.normalMatrix) * inormal);
-
-	float lightIntensity = AMBIENT + max(dot(normalWorldSpace, DIRECTION_TO_LIGHT), 0);
-
-	ocolor = lightIntensity * icolor;
+	vec4 worldPosition = push.modelMatrix * vec4(iposition, 1.0f);
+	gl_Position = ubo.projectionViewMatrix * worldPosition;
+	oworldPosition = worldPosition.xyz;
+	oworldNormal = normalize(mat3(push.normalMatrix) * inormal);
+	ocolor = icolor;
 }

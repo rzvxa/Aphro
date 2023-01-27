@@ -6,6 +6,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <memory>
+#include <unordered_map>
 
 namespace aph {
 
@@ -23,6 +24,7 @@ namespace aph {
 	class GameObject {
 	public:
 		using id_t = unsigned int;
+		using Map = std::unordered_map<id_t, GameObject>;
 
 		static GameObject createGameObject() {
 			static id_t currentId = 0;
@@ -33,6 +35,8 @@ namespace aph {
 		GameObject& operator=(const GameObject&) = delete;
 		GameObject(GameObject&&) = default;
 		GameObject& operator=(GameObject&&) = default;
+
+		id_t getId() { return m_id; }
 
 
 		std::shared_ptr<Mesh> mesh{};

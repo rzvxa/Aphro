@@ -2,9 +2,10 @@
 #define APH_GAME_APP_H
 
 #include "GameObject.h"
-#include "../Window/VulkanWindow.h";
-#include "../Rendering/Vulkan/VulkanDevice.h";
+#include "../Window/VulkanWindow.h"
+#include "../Rendering/Vulkan/VulkanDevice.h"
 #include "../Rendering/Renderer.h"
+#include "../Rendering/Vulkan/VulkanDescriptors.h"
 
 // glm
 #define GLM_FORCE_RADIANS
@@ -37,7 +38,8 @@ namespace aph {
 		VulkanDevice m_device{ m_window };
 		Renderer m_renderer{ m_window, m_device };
 
-		std::vector<GameObject> m_gameObjects;
+		std::unique_ptr<VulkanDescriptorPool> m_globalPool{};
+		GameObject::Map m_gameObjects;
 	};
 }
 

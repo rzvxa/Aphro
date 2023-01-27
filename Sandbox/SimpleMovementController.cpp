@@ -15,8 +15,8 @@ namespace sandbox {
 			m_lastMousePosition = mousePosition;
 			if (!glm::all(glm::lessThan(glm::abs(mouseDelta), glm::vec2(std::numeric_limits<float>::epsilon())))) {
 
-				std::cout << "mouse pos (" << xpos << ", " << ypos << ")" << std::endl;
-				std::cout << "mouse delta (" << mouseDelta.x << ", " << mouseDelta.y << ")" << std::endl;
+				//std::cout << "mouse pos (" << xpos << ", " << ypos << ")" << std::endl;
+				//std::cout << "mouse delta (" << mouseDelta.x << ", " << mouseDelta.y << ")" << std::endl;
 				if (mouseDelta.x < 0) rotate.y += 1.f;
 				if (mouseDelta.x > 0) rotate.y -= 1.f;
 				if (mouseDelta.y < 0) rotate.x -= 1.f;
