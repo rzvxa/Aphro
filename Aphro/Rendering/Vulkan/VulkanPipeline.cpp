@@ -76,6 +76,9 @@ namespace aph {
 		configInfo.dynamicStateInfo.pDynamicStates = configInfo.dynamicStateEnables.data();
 		configInfo.dynamicStateInfo.dynamicStateCount = static_cast<uint32_t>(configInfo.dynamicStateEnables.size());
 		configInfo.dynamicStateInfo.flags = 0;
+
+		configInfo.bindigDescriptions = Mesh::Vertex::getBindingDescriptions();
+		configInfo.attributeDescriptions = Mesh::Vertex::getAttributeDescriptions();
 	}
 
 	VulkanPipeline::VulkanPipeline(
@@ -146,8 +149,8 @@ namespace aph {
 		shaderStages[1].pSpecializationInfo = nullptr;
 
 
-		auto bindingDescriptions = Mesh::Vertex::getBindingDescriptions();
-		auto attributeDescriptions = Mesh::Vertex::getAttributeDescriptions();
+		auto& bindingDescriptions = configInfo.bindigDescriptions;
+		auto& attributeDescriptions = configInfo.attributeDescriptions;
 
 		VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
 		vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;

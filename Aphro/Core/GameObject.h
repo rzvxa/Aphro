@@ -21,6 +21,10 @@ namespace aph {
 		glm::mat4 mat4();
 		glm::mat3 normalMatrix();
 	};
+
+	struct PointLightComponent {
+		float lightIntensity = 1.0f;
+	};
 	class GameObject {
 	public:
 		using id_t = unsigned int;
@@ -31,6 +35,9 @@ namespace aph {
 			return GameObject{ currentId++ };
 		}
 
+		static GameObject makePointLight(
+			float lightIntensity = 10.f, float radius = .1f, glm::vec3 color = glm::vec3(1.f));
+
 		GameObject(const GameObject&) = delete;
 		GameObject& operator=(const GameObject&) = delete;
 		GameObject(GameObject&&) = default;
@@ -39,9 +46,11 @@ namespace aph {
 		id_t getId() { return m_id; }
 
 
-		std::shared_ptr<Mesh> mesh{};
 		glm::vec3 color{};
 		TransformComponent transform{};
+
+		std::shared_ptr<Mesh> mesh{};
+		std::unique_ptr<PointLightComponent> pointLight = nullptr;
 
 	private:
 		GameObject(id_t objId) : m_id(objId) {}

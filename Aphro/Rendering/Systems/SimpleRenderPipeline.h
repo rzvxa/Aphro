@@ -1,11 +1,11 @@
 #ifndef APH_SIMPLE_RENDER_PIPELINE_H
 #define APH_SIMPLE_RENDER_PIPELINE_H
 
-#include "../Core/GameObject.h"
-#include "../Core/Camera.h"
-#include "Vulkan/VulkanPipeline.h";
-#include "Vulkan/VulkanDevice.h";
-#include "FrameInfo.h";
+#include "Core/GameObject.h"
+#include "Core/Camera.h"
+#include "Rendering/Vulkan/VulkanPipeline.h";
+#include "Rendering/Vulkan/VulkanDevice.h";
+#include "Rendering/FrameInfo.h";
 
 
 #include <memory>

@@ -57,4 +57,13 @@ namespace aph {
 			},
 		};
 	}
+	GameObject GameObject::makePointLight(
+		float lightIntensity, float radius, glm::vec3 color) {
+		GameObject go = createGameObject();
+		go.color = color;
+		go.transform.scale.x = radius;
+		go.pointLight = std::make_unique<PointLightComponent>();
+		go.pointLight->lightIntensity = lightIntensity;
+		return go;
+	}
 }
